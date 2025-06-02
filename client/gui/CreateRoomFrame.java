@@ -1,4 +1,4 @@
-package client.gui;
+package client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,24 +9,34 @@ public class CreateRoomFrame extends JFrame {
     }
 
     public CreateRoomFrame(RoomCreateListener listener) {
-        setTitle("방 만들기");
+        setTitle("Create Room");
         setSize(350, 250);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(5, 2, 10, 10));
+        setLayout(new BorderLayout());
 
         JTextField roomNameField = new JTextField();
         JComboBox<String> categoryBox = new JComboBox<>(new String[]{"상식", "과학", "영화", "랜덤"});
         JComboBox<Integer> playerCountBox = new JComboBox<>(new Integer[]{2, 3, 4, 5});
 
-        add(new JLabel("방 제목:"));
-        add(roomNameField);
-        add(new JLabel("카테고리:"));
-        add(categoryBox);
-        add(new JLabel("최대 인원:"));
-        add(playerCountBox);
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JButton createBtn = new JButton("방 만들기");
-        JButton cancelBtn = new JButton("취소");
+        formPanel.add(new JLabel("Name:"));
+        formPanel.add(roomNameField);
+        formPanel.add(new JLabel("Category:"));
+        formPanel.add(categoryBox);
+        formPanel.add(new JLabel("Max Player:"));
+        formPanel.add(playerCountBox);
+
+        add(formPanel, BorderLayout.CENTER);
+
+        JButton createBtn = new JButton("Make Room");
+        JButton cancelBtn = new JButton("Cancel");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(createBtn);
+        buttonPanel.add(cancelBtn);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         createBtn.addActionListener(e -> {
             String roomName = roomNameField.getText().trim();
@@ -37,13 +47,12 @@ public class CreateRoomFrame extends JFrame {
                 listener.onCreate(roomName, category, maxPlayers);
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "방 제목을 입력하세요.");
+                JOptionPane.showMessageDialog(this, "Write Room Name");
             }
         });
 
         cancelBtn.addActionListener(e -> dispose());
-
-        add(createBtn);
-        add(cancelBtn);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        createBtn.setEnabled(false);
     }
 }

@@ -4,7 +4,6 @@ import java.net.*;
 public class ClientHandler extends Thread{
     private Socket incoming; // 클라이언트 소켓.
     private int counter; // 클라이언트 구분용 변수.
-    private GameManager gameManager;
     private PrintWriter out;
     // 외부로 정보를 보낼 변수.
     private BufferedReader in;
@@ -18,7 +17,6 @@ public class ClientHandler extends Thread{
     public ClientHandler(Socket i, int c){
         this.incoming = i;
         this.counter = c;
-        this.gameManager = GameManager.getInstance(); // 객체 참조
         try {
             this.out = new PrintWriter(incoming.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(incoming.getInputStream()));
@@ -34,7 +32,6 @@ public class ClientHandler extends Thread{
 
     public void run(){
         try{
-            getOut().println("COMMAND:MAINPANEL:메인화면");
             while(true){
                 message = in.readLine(); // 입력값 받기
                 parts = message.split(":", 3); // :을 기준으로 입력값 등분
@@ -65,7 +62,8 @@ public class ClientHandler extends Thread{
                         // 랭킹 최신 업데이트
                         break;
 
-                    case "ROOM": // 방 생성,참가,나가기,시작시 이동
+                    case "ROOM":
+                        handleRoom(subCommand);
                         break;
                     default:
                         break;
@@ -79,6 +77,42 @@ public class ClientHandler extends Thread{
             incoming.close();
         } catch (Exception e){
             getOut().println("클라이언트 연결 실패. 재접속해주세요.");
+        }
+    }
+
+    // 대기방 관련 명령 처리 메서드.
+    void handleRoom(String subCommand) {
+        if (subCommand.startsWith("LEAVE")){ // 나갈시 대기방 최신정보 얻어야 함.
+            RoomManager.leaveRoom(player);
+            sendMessage = RoomManager.updateRoomListForAllClients();
+            getOut().println(sendMessage);
+            return;
+        }
+        if (subCommand.startsWith("CREATE")){
+            parts = subCommand.split(":",2);
+            RoomManager.createRoom(player, Integer.parseInt(parts[1]));
+            getOut().println("ROOM:CREATED:" + player.getRoomId());
+            return;
+        }
+        if (subCommand.startsWith("JOIN")){
+            parts = subCommand.split(":",2);
+            RoomManager.joinRoom(player, parts[1]);
+            return;
+        }
+        if (subCommand.startsWith("READY")){
+            parts = subCommand.split(":",2);
+            RoomManager.setReady(player, parts[1], true);
+            return;
+        }
+        if (subCommand.startsWith("UNREADY")) {
+            parts = subCommand.split(":", 2);
+            RoomManager.setReady(player, parts[1], false);
+            return;
+        }
+        if (subCommand.startsWith("REFRESH")) {
+            RoomManager.RoomListString(); // 최신화
+            sendMessage = RoomManager.getRoomList(); // 캐시에서 꺼내옴
+            getOut().println(sendMessage);
         }
     }
 }
