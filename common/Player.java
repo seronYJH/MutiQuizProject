@@ -11,6 +11,7 @@ public class Player implements Serializable {
     private int score;
     private int coins;
     private Integer coupleId; // 커플이 없을 수도 있음
+    private String roomId; // 대기방의 id 저장.
 
     public Player(int userId, String loginId, String nickname, int score, int coins, Integer coupleId) {
         this.userId = userId;
@@ -46,6 +47,10 @@ public class Player implements Serializable {
         return coupleId;
     }
 
+    public String getRoomId() {
+        return roomId;
+    }
+
     // Setter
     public void setNickname(String nickname) {
         this.nickname = nickname;
@@ -61,5 +66,9 @@ public class Player implements Serializable {
 
     public void setCoupleId(Integer coupleId) {
         this.coupleId = coupleId;
+    }
+
+    public void setRoomId(String RoomId){
+        this.roomId = RoomId;
     }
 }
